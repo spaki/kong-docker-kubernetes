@@ -1,0 +1,98 @@
+version: '3.7'
+
+##########################################################
+services:
+
+  ##### kong db image
+  kong-db-on:
+    container_name: kong-db-on
+    image: postgres:9.6
+    restart: always
+    environment:
+      POSTGRES_USER: "kongUser"
+      POSTGRES_PASSWORD: "kongPassword123" 
+      POSTGRES_MULTIPLE_DATABASES: "kong,konga"
+    ports:
+      - "5432:5432"
+    networks:
+      - kong-net
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kongUser"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - "./pg-init-scripts:/docker-entrypoint-initdb.d"
+    #  - "db-data-kong-postgres:/var/lib/postgresql/data"
+
+  ##### kong db setup/migrations
+  kong-db-migrations-on:
+    container_name: kong-db-migrations-on
+    image: kong:latest
+    command: kong migrations bootstrap
+    restart: on-failure
+    environment:
+      KONG_DATABASE: "postgres"
+      KONG_PG_HOST: "kong-db-on"
+      KONG_PG_USER: "kongUser"
+      KONG_PG_PASSWORD: "kongPassword123" 
+    networks:
+      - kong-net
+    depends_on:
+      - kong-db-on
+
+  ##### kong container
+  kong-on:
+    container_name: kong-on
+    image: kong:latest
+    restart: on-failure
+    environment:
+      KONG_DATABASE: "postgres"
+      KONG_PG_HOST: "kong-db-on"
+      KONG_PG_USER: "kongUser"
+      KONG_PG_PASSWORD: "kongPassword123" 
+      KONG_PROXY_ACCESS_LOG: "/dev/stdout" 
+      KONG_ADMIN_ACCESS_LOG: "/dev/stdout" 
+      KONG_PROXY_ERROR_LOG: "/dev/stderr" 
+      KONG_ADMIN_ERROR_LOG: "/dev/stderr" 
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001, 0.0.0.0:8444 ssl" 
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+    networks:
+      - kong-net
+    depends_on:
+      - kong-db-migrations-on
+
+  ##### konga container
+  konga-on:
+    container_name: konga-on
+    image: pantsel/konga
+    restart: always
+    environment:
+      DB_ADAPTER: "postgres"
+      DB_HOST: "kong-db-on"
+      DB_DATABASE: "konga"
+      DB_USER: "kongUser"
+      DB_PASSWORD: "kongPassword123" 
+      TOKEN_SECRET: "tokenSecret123"
+    ports:
+      - "1337:1337"
+    networks:
+      - kong-net
+    depends_on:
+      - kong-on
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://konga-on:1337"]
+      interval: 5s
+      timeout: 2s
+      retries: 15
+
+##########################################################
+networks:
+
+  ####################
+  kong-net:
+    driver: bridge
