@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: konga-on
+  name: konga-on
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: konga-on
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/kong-net: "true"
+        io.kompose.service: konga-on
+    spec:
+      containers:
+      - env:
+        - name: DB_ADAPTER
+          value: postgres
+        - name: DB_DATABASE
+          value: konga
+        - name: DB_HOST
+          value: kong-db-on
+        - name: DB_PASSWORD
+          value: kongPassword123
+        - name: DB_USER
+          value: kongUser
+        - name: TOKEN_SECRET
+          value: tokenSecret123
+        image: pantsel/konga
+        imagePullPolicy: ""
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - -f
+            - http://konga-on:1337
+          failureThreshold: 15
+          periodSeconds: 5
+          timeoutSeconds: 2
+        name: konga-on
+        ports:
+        - containerPort: 1337
+        resources: {}
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes: null
+status: {}
