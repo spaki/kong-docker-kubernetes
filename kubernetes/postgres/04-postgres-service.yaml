@@ -11,8 +11,12 @@ spec:
   selector:
    app: postgres
 
-# kubectl create -f postgres-configmap.yaml 
-#kubectl create -f postgres-storage.yaml 
+# kubectl create -f 01-postgres-configmap.yaml 
+# kubectl create -f 02-postgres-storage.yaml 
+# kubectl create -f 03-postgres-deployment.yaml
+# kubectl create -f 04-postgres-service.yaml 
+
+# kubectl get svc postgres
 
 # kubectl delete service postgres 
 # kubectl delete deployment postgres

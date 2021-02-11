@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: konga
+  labels:
+    app: konga
+spec:
+  type: NodePort
+  ports:
+   - port: 1337
+     targetPort: 1337
+  selector:
+   app: konga
+
+# kubectl create -f 01-konga-on-deployment.yaml
+# kubectl create -f 02-konga-on-service.yaml
+
+# kubectl get svc konga

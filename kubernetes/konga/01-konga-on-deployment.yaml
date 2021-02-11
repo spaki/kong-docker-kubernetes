@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: konga
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: konga
+  template:
+    metadata:
+      labels:
+        app: konga
+    spec:
+      containers:
+        - name: konga
+          image: pantsel/konga
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 1337
+          env:
+          - name: DB_ADAPTER
+            value: postgres
+          - name: DB_DATABASE
+            value: konga
+          - name: DB_HOST
+            value: postgres
+          - name: DB_PASSWORD
+            value: 3c5303d6-b50d
+          - name: DB_USER
+            value: postgresadmin
+          - name: TOKEN_SECRET
+            value: tokenSecret123
