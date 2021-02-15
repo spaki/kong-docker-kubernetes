@@ -12,7 +12,7 @@ spec:
   selector:
    app: konga
 
-# kubectl create -f 01-konga-on-deployment.yaml
-# kubectl create -f 02-konga-on-service.yaml
+# kubectl create -f 01-konga-deployment.yaml
+# kubectl create -f 02-konga-service.yaml
 
 # kubectl get svc konga

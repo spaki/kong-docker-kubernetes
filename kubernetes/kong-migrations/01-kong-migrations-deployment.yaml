@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong-migrations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong-migrations
+  template:
+    metadata:
+      labels:
+        app: kong-migrations
+    spec:
+      containers:
+        - name: kong-migrations
+          image: kong:latest
+          imagePullPolicy: "IfNotPresent"
+          args:
+            - kong
+            - migrations
+            - bootstrap
+          env:
+          - name: KONG_DATABASE
+            value: postgres
+          - name: KONG_PG_HOST
+            value: postgres
+          - name: KONG_PG_USER
+            value: postgresadmin
+          - name: KONG_PG_PASSWORD
+            value: 3c5303d6-b50d
+
+
+# CREATE DATABASE kong; 
+
+# kubectl create -f 01-kong-migrations-deployment.yaml
+
+# kubectl apply -f 01-kong-migrations-deployment.yaml
+# kubectl scale deployment kong-migrations --replicas=0
+# kubectl scale deployment kong-migrations --replicas=1
+
+# kubectl get deployment kong-migrations
+
+# kubectl get pods
+# kubectl logs kong-migrations-7bb79655d6-prphq
